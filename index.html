@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do List - Huỳnh Thị Ly</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 450px; border: 2px solid #007bff; }
+        .header-info { background: #e7f3ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; line-height: 1.6; }
+        .header-info b { color: #0056b3; }
+        .question-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+        .dropdown-check-list { width: 100%; }
+        .items { height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin-top: 5px; }
+        .todo-input { width: 75%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-add { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f9f9f9; margin-top: 5px; padding: 8px; border-left: 4px solid #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-info">
+            <div><b>Tên:</b> HUỲNH THỊ LY</div>
+            <div><b>MSSV:</b> 29209020282</div>
+            <div><b>Ngày sinh:</b> 01/12/2005</div>
+        </div>
+
+        <div class="question-section">
+            <b>Tìm hiểu về Ly (Tích chọn nhiều câu):</b>
+            <div class="items">
+                <div><input type="checkbox"> Ly thích học lập trình chứ?</div>
+                <div><input type="checkbox"> Mục tiêu của Ly là làm Tester chuyên nghiệp?</div>
+                <div><input type="checkbox"> Ly có thích nghiên cứu về AI không?</div>
+                <div><input type="checkbox"> Ly muốn thực tập tại doanh nghiệp lớn?</div>
+                <div><input type="checkbox"> Ly có dự định học thêm ngoại ngữ không?</div>
+            </div>
+        </div>
+
+        <b>Danh sách công việc:</b><br><br>
+        <input type="text" id="taskInput" class="todo-input" placeholder="Nhập việc cần làm...">
+        <button onclick="addTask()" class="btn-add">Thêm</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        async function loadTasks() {
+            const res = await fetch('/api/tasks');
+            const data = await res.json();
+            document.getElementById('taskList').innerHTML = data.map(t => `<li>${t.title}</li>`).join('');
+        }
+        async function addTask() {
+            const input = document.getElementById('taskInput');
+            if(!input.value) return;
+            await fetch('/api/tasks', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ title: input.value })
+            });
+            input.value = ''; loadTasks();
+        }
+        loadTasks();
+    </script>
+</body>
+</html>
