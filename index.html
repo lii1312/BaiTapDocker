@@ -9,12 +9,13 @@
         .header-info { background: #e7f3ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; line-height: 1.6; }
         .header-info b { color: #0056b3; }
         .question-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-        .dropdown-check-list { width: 100%; }
         .items { height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin-top: 5px; }
-        .todo-input { width: 75%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .todo-input { width: 70%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .btn-add { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        /* CSS cho nút Xóa */
+        .btn-del { padding: 4px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
         ul { list-style: none; padding: 0; }
-        li { background: #f9f9f9; margin-top: 5px; padding: 8px; border-left: 4px solid #28a745; }
+        li { background: #f9f9f9; margin-top: 5px; padding: 10px; border-left: 4px solid #28a745; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -43,11 +44,19 @@
     </div>
 
     <script>
+        // Hàm nhúng API Lấy danh sách
         async function loadTasks() {
             const res = await fetch('/api/tasks');
             const data = await res.json();
-            document.getElementById('taskList').innerHTML = data.map(t => `<li>${t.title}</li>`).join('');
+            document.getElementById('taskList').innerHTML = data.map(t => `
+                <li>
+                    <span>${t.title}</span>
+                    <button onclick="deleteTask(${t.id})" class="btn-del">Xóa</button>
+                </li>
+            `).join('');
         }
+
+        // Hàm nhúng API Thêm mới
         async function addTask() {
             const input = document.getElementById('taskInput');
             if(!input.value) return;
@@ -58,6 +67,15 @@
             });
             input.value = ''; loadTasks();
         }
+
+        // --- PHẦN MỚI: Hàm nhúng API Xóa ---
+        async function deleteTask(id) {
+            if(confirm("Ly có chắc chắn muốn xóa không?")) {
+                await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+                loadTasks(); // Tải lại danh sách sau khi xóa thành công
+            }
+        }
+
         loadTasks();
     </script>
 </body>
