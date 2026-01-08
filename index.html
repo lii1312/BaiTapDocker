@@ -2,17 +2,23 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>To-Do List - Huỳnh Thị Ly</title>
+    <title>To-Do List & Map - Huỳnh Thị Ly</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 450px; border: 2px solid #007bff; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 500px; border: 2px solid #007bff; margin-bottom: 20px; }
         .header-info { background: #e7f3ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; line-height: 1.6; }
         .header-info b { color: #0056b3; }
-        .question-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-        .items { height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin-top: 5px; }
+        
+        /* Phần ô tích chọn - Đã chỉnh lại còn 3 cái */
+        .question-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 10px; background-color: #fff; }
+        .items div { margin-bottom: 8px; }
+        
+        /* Khung hiển thị bản đồ */
+        #map { height: 250px; width: 100%; border-radius: 10px; border: 1px solid #ddd; margin: 15px 0; }
+        
         .todo-input { width: 70%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .btn-add { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        /* CSS cho nút Xóa */
         .btn-del { padding: 4px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
         ul { list-style: none; padding: 0; }
         li { background: #f9f9f9; margin-top: 5px; padding: 10px; border-left: 4px solid #28a745; display: flex; justify-content: space-between; align-items: center; }
@@ -27,15 +33,18 @@
         </div>
 
         <div class="question-section">
-            <b>Tìm hiểu về Ly (Tích chọn nhiều câu):</b>
-            <div class="items">
+            <b>Tìm hiểu về Ly (Tích chọn 3 câu):</b>
+            <div class="items" style="margin-top: 10px;">
                 <div><input type="checkbox"> Ly thích học lập trình chứ?</div>
                 <div><input type="checkbox"> Mục tiêu của Ly là làm Tester chuyên nghiệp?</div>
-                <div><input type="checkbox"> Ly có thích nghiên cứu về AI không?</div>
                 <div><input type="checkbox"> Ly muốn thực tập tại doanh nghiệp lớn?</div>
-                <div><input type="checkbox"> Ly có dự định học thêm ngoại ngữ không?</div>
             </div>
         </div>
+
+        <b>Vị trí dự án tại Đà Nẵng:</b>
+        <div id="map"></div>
+
+        <hr style="margin: 20px 0;">
 
         <b>Danh sách công việc:</b><br><br>
         <input type="text" id="taskInput" class="todo-input" placeholder="Nhập việc cần làm...">
@@ -43,8 +52,16 @@
         <ul id="taskList"></ul>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Hàm nhúng API Lấy danh sách
+        // --- KHỞI TẠO BẢN ĐỒ ---
+        var map = L.map('map').setView([16.0611, 108.2272], 14);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([16.0611, 108.2272]).addTo(map).bindPopup('Chào Ly! Đây là khu vực Đà Nẵng.').openPopup();
+
+        // --- XỬ LÝ API TO-DO ---
         async function loadTasks() {
             const res = await fetch('/api/tasks');
             const data = await res.json();
@@ -56,7 +73,6 @@
             `).join('');
         }
 
-        // Hàm nhúng API Thêm mới
         async function addTask() {
             const input = document.getElementById('taskInput');
             if(!input.value) return;
@@ -68,14 +84,12 @@
             input.value = ''; loadTasks();
         }
 
-        // --- PHẦN MỚI: Hàm nhúng API Xóa ---
         async function deleteTask(id) {
             if(confirm("Ly có chắc chắn muốn xóa không?")) {
                 await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-                loadTasks(); // Tải lại danh sách sau khi xóa thành công
+                loadTasks();
             }
         }
-
         loadTasks();
     </script>
 </body>
